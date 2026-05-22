@@ -1,3 +1,5 @@
+import gc
+import matplotlib.pyplot as plt
 import streamlit as st
 import numpy as np
 
@@ -49,7 +51,7 @@ with st.sidebar:
         epochs = st.slider("Epochs", 1, 200, 40, 1)
         hidden_neurons = None
     else:
-        epochs = st.slider("Epochs", 100, 5000, 1000, 100)
+        epochs = st.slider("Epochs", 100, 2000, 1000, 100)
         hidden_neurons = st.slider("Hidden neurons", 2, 20, 4, 1)
 
     random_state = st.number_input("Random seed", value=42, step=1)
@@ -94,6 +96,12 @@ with col1:
         )    
 
     if train_button:
+        for key in ["model", "history", "X", "y", "epochs", "model_name", "dataset_name"]:
+            if key in st.session_state:
+                del st.session_state[key]
+
+        gc.collect()
+
         if model_name == "Single Perceptron":
             model = Perceptron(
                 learning_rate=learning_rate,
@@ -173,6 +181,8 @@ with col1:
         )
 
         st.pyplot(fig_boundary)
+        plt.close(fig_boundary)
+        gc.collect()
 
     else:
         st.write("Tryck på **Träna modellen** för att se beslutsgränsen.")
@@ -191,6 +201,8 @@ with col2:
 
         fig_history = plot_training_history(history, model_name_saved)
         st.pyplot(fig_history)
+        plt.close(fig_history)
+        gc.collect()
 
         if model_name_saved == "Single Perceptron":
             st.markdown(
